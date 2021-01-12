@@ -1,0 +1,5 @@
+{:paths ["dev" "resources"]
+
+ :deps
+ {org.clojure/clojure {:mvn/version "1.10.1"}
+  org.bouncycastle/bcprov-jdk15on {:mvn/version "1.68"}}}
