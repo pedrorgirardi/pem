@@ -1,6 +1,6 @@
 (ns user
   (:import (java.security KeyFactory KeyPairGenerator)
-           (java.security.spec X509EncodedKeySpec)
+           (java.security.spec X509EncodedKeySpec PKCS8EncodedKeySpec)
            (org.bouncycastle.util.io.pem PemObject PemReader PemWriter)
            (java.io FileReader StringWriter StringReader)))
 
@@ -8,7 +8,7 @@
 (comment
 
   (def EdDSA-KeyPairGenerator
-    (KeyPairGenerator/getInstance "EdDSA"))
+    (KeyPairGenerator/getInstance "Ed25519"))
 
   (def random-key-pair
     (.generateKeyPair EdDSA-KeyPairGenerator))
@@ -29,8 +29,10 @@
   (.getHeaders (PemObject. "PUBLIC KEY" (.getEncoded (.getPublic random-key-pair))))
   ;; => []
 
-  ;; -- 1. Write PEM.
-  ;; Public Key PEM-encoded.
+
+  ;; -- PUBLIC KEY
+
+  ;; Write.
   (def pem-public-key
     (with-open [string-writer (StringWriter.)
                 pem-writer (PemWriter. string-writer)]
@@ -39,26 +41,54 @@
       (.toString string-writer)))
 
 
-  ;; -- 2. Read PEM.
-  (def key-spec
+  ;; Read.
+  (def public-key-spec
     (with-open [string-reader (StringReader. pem-public-key)
                 pem-reader (PemReader. string-reader)]
       (X509EncodedKeySpec. (.getContent (.readPemObject pem-reader)))))
 
-  (-> (KeyFactory/getInstance "EdDSA")
-      (.generatePublic key-spec))
+  (-> (KeyFactory/getInstance "Ed25519")
+      (.generatePublic public-key-spec))
 
+
+  ;; -- PRIVATE KEY
+
+  ;; Write.
+  (def pem-private-key
+    (with-open [string-writer (StringWriter.)
+                pem-writer (PemWriter. string-writer)]
+      (.writeObject pem-writer (PemObject. "ED25519 PRIVATE KEY" (.getEncoded (.getPrivate random-key-pair))))
+      (.flush pem-writer)
+      (.toString string-writer)))
+
+
+  ;; Read.
+  (def private-key-spec
+    (with-open [string-reader (StringReader. pem-private-key)
+                pem-reader (PemReader. string-reader)]
+      (PKCS8EncodedKeySpec. (.getContent (.readPemObject pem-reader)))))
+
+  (-> (KeyFactory/getInstance "Ed25519")
+      (.generatePrivate private-key-spec))
 
 
   ;; ---------------------------------------
 
 
-  (def key-spec
-    (with-open [reader (PemReader. (FileReader. "resources/public_key.key"))]
+  ;; -- Public Key.
+  (def public-key-spec
+    (with-open [reader (PemReader. (FileReader. "resources/public_key.pem"))]
       (X509EncodedKeySpec. (.getContent (.readPemObject reader)))))
 
-  (-> (KeyFactory/getInstance "EdDSA")
-      (.generatePublic key-spec))
+  (-> (KeyFactory/getInstance "Ed25519")
+      (.generatePublic public-key-spec))
 
+  ;; -- Private Key.
+  (def private-key-spec
+    (with-open [reader (PemReader. (FileReader. "resources/private_key.pem"))]
+      (PKCS8EncodedKeySpec. (.getContent (.readPemObject reader)))))
+
+  (-> (KeyFactory/getInstance "Ed25519")
+      (.generatePrivate private-key-spec))
 
   )
