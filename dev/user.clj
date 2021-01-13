@@ -1,6 +1,9 @@
 (ns user
   (:import (java.security KeyFactory KeyPairGenerator Security)
            (java.security.spec X509EncodedKeySpec PKCS8EncodedKeySpec)
+           (sun.security.util SecurityProviderConstants)
+           (sun.security.ec.ed EdDSAParameters)
+
            (org.bouncycastle.util.io.pem PemObject PemReader PemWriter)
            (java.io FileReader StringWriter StringReader)))
 
@@ -11,6 +14,12 @@
   (doseq [provider (Security/getProviders)]
     (print (bean provider)
            "\n\n-------------\n\n"))
+
+  SecurityProviderConstants/DEF_ED_KEY_SIZE
+  ;; => 255
+
+  (EdDSAParameters/getBySize nil SecurityProviderConstants/DEF_ED_KEY_SIZE)
+
 
   (def EdDSA-KeyPairGenerator
     (KeyPairGenerator/getInstance "Ed25519"))
