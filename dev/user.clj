@@ -1,11 +1,16 @@
 (ns user
-  (:import (java.security KeyFactory KeyPairGenerator)
+  (:import (java.security KeyFactory KeyPairGenerator Security)
            (java.security.spec X509EncodedKeySpec PKCS8EncodedKeySpec)
            (org.bouncycastle.util.io.pem PemObject PemReader PemWriter)
            (java.io FileReader StringWriter StringReader)))
 
 
 (comment
+
+  ;; Installed Providers.
+  (doseq [provider (Security/getProviders)]
+    (print (bean provider)
+           "\n\n-------------\n\n"))
 
   (def EdDSA-KeyPairGenerator
     (KeyPairGenerator/getInstance "Ed25519"))
@@ -72,6 +77,7 @@
       (.generatePrivate private-key-spec))
 
   (count (:encoded (bean private-key-spec)))
+  ;; => 48
 
 
 
@@ -99,6 +105,7 @@
   ;;     :format "PKCS#8"}
 
   (count (:encoded (bean private-key-spec)))
+  ;; => 78
 
   (-> (KeyFactory/getInstance "Ed25519")
       (.generatePrivate private-key-spec))
