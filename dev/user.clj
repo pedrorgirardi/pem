@@ -57,7 +57,7 @@
   (def pem-private-key
     (with-open [string-writer (StringWriter.)
                 pem-writer (PemWriter. string-writer)]
-      (.writeObject pem-writer (PemObject. "ED25519 PRIVATE KEY" (.getEncoded (.getPrivate random-key-pair))))
+      (.writeObject pem-writer (PemObject. "PRIVATE KEY" (.getEncoded (.getPrivate random-key-pair))))
       (.flush pem-writer)
       (.toString string-writer)))
 
@@ -71,11 +71,14 @@
   (-> (KeyFactory/getInstance "Ed25519")
       (.generatePrivate private-key-spec))
 
+  (count (:encoded (bean private-key-spec)))
 
-  ;; ---------------------------------------
 
 
-  ;; -- Public Key.
+  ;; PEM FILE
+
+  ;; -- PUBLIC KEY
+
   (def public-key-spec
     (with-open [reader (PemReader. (FileReader. "resources/public_key.pem"))]
       (X509EncodedKeySpec. (.getContent (.readPemObject reader)))))
@@ -83,10 +86,19 @@
   (-> (KeyFactory/getInstance "Ed25519")
       (.generatePublic public-key-spec))
 
-  ;; -- Private Key.
+  ;; -- PRIVATE KEY
+
   (def private-key-spec
     (with-open [reader (PemReader. (FileReader. "resources/private_key.pem"))]
       (PKCS8EncodedKeySpec. (.getContent (.readPemObject reader)))))
+
+  (bean private-key-spec)
+  ;; => {:algorithm nil,
+  ;;     :class java.security.spec.PKCS8EncodedKeySpec,
+  ;;     :encoded #object["[B" 0x69665733 "[B@69665733"],
+  ;;     :format "PKCS#8"}
+
+  (count (:encoded (bean private-key-spec)))
 
   (-> (KeyFactory/getInstance "Ed25519")
       (.generatePrivate private-key-spec))
