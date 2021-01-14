@@ -8,6 +8,9 @@
            (java.io FileReader StringWriter StringReader)))
 
 
+(def EdDSA-KeyPairGenerator
+  (KeyPairGenerator/getInstance "Ed25519"))
+
 (comment
 
   ;; Installed Providers.
@@ -20,9 +23,6 @@
 
   (EdDSAParameters/getBySize nil SecurityProviderConstants/DEF_ED_KEY_SIZE)
 
-
-  (def EdDSA-KeyPairGenerator
-    (KeyPairGenerator/getInstance "Ed25519"))
 
   (def random-key-pair
     (.generateKeyPair EdDSA-KeyPairGenerator))
