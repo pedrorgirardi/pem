@@ -107,6 +107,9 @@
     (with-open [reader (PemReader. (FileReader. "resources/private_key.pem"))]
       (PKCS8EncodedKeySpec. (.getContent (.readPemObject reader)))))
 
+  (-> (KeyFactory/getInstance "Ed25519")
+      (.generatePrivate private-key-spec))
+
   (bean private-key-spec)
   ;; => {:algorithm nil,
   ;;     :class java.security.spec.PKCS8EncodedKeySpec,
@@ -114,9 +117,6 @@
   ;;     :format "PKCS#8"}
 
   (count (:encoded (bean private-key-spec)))
-  ;; => 78
-
-  (-> (KeyFactory/getInstance "Ed25519")
-      (.generatePrivate private-key-spec))
+  ;; => 48
 
   )
